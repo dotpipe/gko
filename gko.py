@@ -2,7 +2,7 @@ import random
 import math as Math
 
 def antiderivative(n, x):
-    return (2 * (n + x)) / (n + 1)
+    return ((2 * n) + x) / (n + 1) / 10
 
 def find_correct_pattern(differential, threshold, number, f):
     largess = differential
@@ -42,7 +42,7 @@ def test_highest_order_bit(number):
 def main():
     # count = input("Enter the count for generating random numbers: ")
 
-    count = 10
+    count = 24
     integration = 1
     differentials = []
     numbers = []
@@ -63,7 +63,7 @@ def main():
         print(f"The correct pattern for differential {num} is: {pattern}")
         print(f"Threshold (binary): {threshold}")
         print(f"Threshold (power of 2): {2**(b)} {i}")
-        integral = (threshold)
+        integral = int(threshold)
         integration /= integral
         continuum -= (integration)
         integration = continuum
