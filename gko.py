@@ -1,20 +1,20 @@
-# def derivative(n, x):
-#     return ((2 * n) + x) / (n-1)
 import random
+import math as Math
 import struct
+def derivative(n, x):
+    return (2 * (n + x)) / (n-1)
+
 def find_correct_pattern(differential, f):
     largess = round(differential)
-    f = 2 if f <= 12 else f
     x = 0
-    while ((largess) > 2):# (test_highest_order_bit(largess) >= threshold + 1):# and largess > number):
+    while ((largess) >= 4):# (test_highest_order_bit(largess) >= threshold + 1):# and largess > number):
         i = 3
         while i >= 2:
             largess = (largess / i)
             x =  abs(largess)
             i -= 1
     largess = 1 if x == 0 else largess
-    return largess, ((f*largess)%16)
-
+    return (f*(largess)%2)
 # def process_file(input_file, output_file, count):
 #     with open(output_file, "wb") as outfile:
 #         with open(input_file, "rb") as file:
@@ -61,34 +61,34 @@ def process_file(input_file, output_file, count):
                             binary >>= 8
 
 def main():
-    count = 100
+    count = 1000
     differentials = []
     numbers = []
     with open("out3.bin", "wb") as outfile:
-        with open("out2.bin", "rb") as file:
+        with open("xfile", "rb") as file:
             while True:
                 differentials.clear()
                 numbers.clear()
                 data = file.read(count)
                 if not data:
                     break
-                diff = 0
-                for a in data:
-                    binary_representation = bin(a)[2:].zfill(8)  # Convert byte to binary and ensure it's 8 bits long
-                    for b in binary_representation:    
-                        # diff += 1
-                        numbers.insert(0,b)
+                y = 0
                 x = 0
-                while True:
-                    x += 1
-                    for i, num in zip(range(len(numbers),0,-1), numbers):
-                        threshold = find_correct_pattern(x, i)
-                        if threshold == num:
+                for truth in (data):
+                    while True:
+                        y += 1
+                        x = 0
+                        for v, a in zip(range(count,0,-1), bin(truth)[2:].zfill(8)):
+                            threshold = find_correct_pattern(y, v)
+                            # if (threshold%2 != a):
+                            x += 1 # counter
+                            # else:
+                            #     print(v)
+                            #     break
+                        if x == 8:
                             break
-                    outfile.write(struct.pack('I',x))
-                    break
-    
-    process_file("out3.bin", "out4.bin", 1)
+                outfile.write(bytes(chr(y).encode()))
+    # process_file("out3.bin", "out4.bin", 1)
     print("Finished")
 
 if __name__ == "__main__":
