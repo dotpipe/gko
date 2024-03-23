@@ -1,72 +1,95 @@
+# def derivative(n, x):
+#     return ((2 * n) + x) / (n-1)
 import random
-import math as Math
-
-def antiderivative(n, x):
-    return ((2 * n) + x) / (n + 1)
-
-def find_correct_pattern(differential, threshold, number, f):
+import struct
+def find_correct_pattern(differential, f):
     largess = round(differential)
-    while (test_highest_order_bit(round(largess)) >= threshold):# (test_highest_order_bit(largess) >= threshold + 1):# and largess > number):
+    f = 2 if f <= 12 else f
+    x = 0
+    while ((largess) > 2):# (test_highest_order_bit(largess) >= threshold + 1):# and largess > number):
         i = 3
         while i >= 2:
-            largess = round(largess / i)
-            # if test_highest_order_bit(round(largess)) <= largess:
-            #     return i, number
-            if Math.ceil(round((largess + f) * (f))) == number:
-                return i, number
-            if Math.floor(round((largess + f) * (f))) == number:
-                return i, number
-            # largess = Math.ceil(((largess * f) // (f - 1)) - (2 * f) // 3)
+            largess = (largess / i)
+            x =  abs(largess)
             i -= 1
-    return None, round((largess + f) * (f)) # Math.ceil(((largess * f) // (f - 1)) - (2 * f) // 3)
+    largess = 1 if x == 0 else largess
+    return largess, ((f*largess)%16)
 
-def undo_integration(largess, thresholds, patterns):
-    binary_pattern = ""
-    for pattern, threshold in zip(patterns, thresholds):
-        divisor = pattern[0] if pattern == "0" else pattern[1]
-        division = largess // threshold
-        largess -= division * threshold
-        binary_pattern += pattern
-    return largess, binary_pattern
+# def process_file(input_file, output_file, count):
+#     with open(output_file, "wb") as outfile:
+#         with open(input_file, "rb") as file:
+#             while True:
+#                 data = file.read(count)
+#                 if not data:
+#                     break
+#                 string = 0
+#                 for i in range(len(data)*8):
+#                     t, thr = find_correct_pattern(4, i)
+#                     thr = 1 if thr % 2 != 1 else 0
+#                     string <<= 1
+#                     string += thr
+#                 outfile.write(string.to_bytes((len(data) + 7) // 8, byteorder='big'))
+def derivative(n, x):
+    # Dummy implementation, replace with your actual derivative function
+    return ((2 * n) + x) / (n-1)
 
-def test_highest_order_bit(number):
-    # Shift the number right until it becomes zero
-    # Count the number of shifts needed to reach zero
-    # The number of shifts corresponds to the position of the highest order bit
-    highest_order_bit_position = 0
-    number = Math.floor(number)
-    while number:
-        number >>= 1
-        highest_order_bit_position += 1
-    return highest_order_bit_position
+def flip_bit(bit):
+    return 1 if bit == 0 else 0
+
+def process_file(input_file, output_file, count):
+    with open(output_file, "wb") as outfile:
+        with open(input_file, "rb") as file:
+            while True:
+                byte = file.read(1)
+                if not byte:
+                    break
+                b = int(byte[0])
+                binary = 0
+                for i in range(count*8 - 1, -1, -1):
+                    # Pass each bit through find_correct_pattern
+                    _, thr = find_correct_pattern(b, i)
+                    thr = 1 if thr % 2 != 1 else 0
+                    binary <<= 1
+                    binary = binary + (thr)
+
+                    if (i % 64 == 0):
+                        # out = int(binary, 2)
+                        while (binary > 0):
+                            y = (binary%256)
+                            v = chr(y)
+                            outfile.write(v.encode())
+                            binary >>= 8
 
 def main():
-    # count = input("Enter the count for generating random numbers: ")
-
-    count = 12
-    integration = 1
+    count = 100
     differentials = []
     numbers = []
-    for diff in range(1,count):
-        a = random.randint(0,256)
-        numbers.insert(0,a)
-        differentials.append((antiderivative(diff, a)))
-        integration *= (antiderivative(diff, a))
-
-    print(numbers)
-    print("Integration:", integration)
-    continuum = integration
-    for i, num, truth in zip(range(count,1,-1), differentials, numbers):
-        b = test_highest_order_bit(num)
-        pattern, threshold = find_correct_pattern(integration, b, num, i)
-        print(f"The correct pattern for differential {num} is: {pattern}")
-        print(f"Threshold (binary): {int((threshold + i) / (i / 2))} {truth}")
-        print(f"Threshold (power of 2): {2**(b)} {i}")
-        integral = int((threshold + i) / (i / 2))
-        integration /= integral
-        continuum -= (integration)
-        integration = continuum
-    print("Final Largess after undoing integration:", continuum)
+    with open("out3.bin", "wb") as outfile:
+        with open("out2.bin", "rb") as file:
+            while True:
+                differentials.clear()
+                numbers.clear()
+                data = file.read(count)
+                if not data:
+                    break
+                diff = 0
+                for a in data:
+                    binary_representation = bin(a)[2:].zfill(8)  # Convert byte to binary and ensure it's 8 bits long
+                    for b in binary_representation:    
+                        # diff += 1
+                        numbers.insert(0,b)
+                x = 0
+                while True:
+                    x += 1
+                    for i, num in zip(range(len(numbers),0,-1), numbers):
+                        threshold = find_correct_pattern(x, i)
+                        if threshold == num:
+                            break
+                    outfile.write(struct.pack('I',x))
+                    break
+    
+    process_file("out3.bin", "out4.bin", 1)
+    print("Finished")
 
 if __name__ == "__main__":
     main()
